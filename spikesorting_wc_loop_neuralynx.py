@@ -20,7 +20,7 @@ global_job_kwargs = dict(n_jobs=4, chunk_duration="1s")
 si.set_global_job_kwargs(**global_job_kwargs)
 
 # Paths
-REMOTE_PREFIX = "sunlab1:EMU_data/P06/Behav/SU/EXP24-25_Bari/Delayed_Discounting"
+REMOTE_PREFIX = "sunlab1:EMU_data/P06/Behav/SU/EXP24-25_Bari/Delayed_Discounting" # Change this to your file path
 LOCAL_ROOT = pathlib.Path("./neurolnx")
 LOCAL_ROOT.mkdir(exist_ok=True)
 
