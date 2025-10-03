@@ -20,11 +20,11 @@ global_job_kwargs = dict(n_jobs=4, chunk_duration="1s")
 si.set_global_job_kwargs(**global_job_kwargs)
 
 # Paths
-REMOTE_PREFIX = "sunlab1:EMU_data/P06/Behav/SU/EXP24-25_Bari/Delayed_Discounting" # Change this to your file path
+REMOTE_PREFIX = "YOUR/FILE/PATH" 
 LOCAL_ROOT = pathlib.Path("./neurolnx")
 LOCAL_ROOT.mkdir(exist_ok=True)
 
-# List of filenames to process
+# List of filenames to process (MODIFY TO YOUR FILE NAME)
 ncs_filenames = [f"GA1-REC{i}.ncs" for i in range(1, 9)]
                 # [f"GC1-LSTG{i}.ncs" for i in range(1, 9)] + \
                 # [f"GB4-LMTG{i}.ncs" for i in range(1, 9)] + \
@@ -55,7 +55,7 @@ for fname in ncs_filenames:
     recording = se.NeuralynxRecordingExtractor(folder_path=str(temp_folder))
     print(f"📏 Recording: {recording.get_num_channels()} channels @ {recording.get_sampling_frequency()} Hz")
 
-    # Assign dummy probe
+    # Assign dummy probe (SET YOUR PROBE)
     probe = Probe(ndim=2, si_units="um")
     probe.set_contacts(positions=np.array([[0.0, 0.0]]), shapes="circle", shape_params={"radius": 3})
     probe.set_device_channel_indices(np.array([0]))
@@ -66,16 +66,17 @@ for fname in ncs_filenames:
     recording_preprocessed = recording_f.save(format="binary")
 
     # Run spike sorter
-    sorter_name = "kilosort4" 
     sorter_output = LOCAL_ROOT / f"sort_{fname.replace('.ncs', '')}"
-    sorting_ks4 = ss.run_sorter(sorter_name=sorter_name,
+    sorting_wc = ss.run_sorter(sorter_name=sorter_name,
                                 recording=recording_preprocessed,
                                 output_folder=sorter_output,
-                                Th_universal=7.0,
+                                singularity_image="./waveclus-compiled-base-patched",
+                                detect_threshold=4,
+                                min_clus=20,
+                                stdmax=50,
                                 keep_good_only=False)
 
-
-                            
+                          
     ### SORTERS ###
 
     # sorter_name = "kilosort4" 
@@ -114,7 +115,7 @@ for fname in ncs_filenames:
     # Create analyzer
     analyzer_folder = LOCAL_ROOT / f"analyzer_{fname.replace('.ncs', '')}"
     sorting_analyzer = si.create_sorting_analyzer(
-        sorting=sorting_ks4,
+        sorting=sorting_wc,
         recording=recording_geo,
         format="binary_folder",
         folder=str(analyzer_folder),
